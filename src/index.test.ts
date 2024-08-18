@@ -2,7 +2,7 @@ import { test, expect } from "@jest/globals";
 import { SolarNow, SolarNowPrecise } from "./index";
 import dayjs from "dayjs";
 
-test("query key test - chain:actions > params", () => {
+test("solar now and solar now precise should be the same", () => {
   const solar1 = SolarNow(150);
   const solar2 = SolarNowPrecise("150");
 
