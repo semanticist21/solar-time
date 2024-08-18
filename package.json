@@ -24,7 +24,6 @@
     "type": "git",
     "url": "https://github.com/semanticist21/solar-time"
   },
-  "keywords": [],
   "author": "semanticist21",
   "license": "MIT",
   "devDependencies": {
@@ -45,5 +44,27 @@
   "dependencies": {
     "dayjs": "^1.11.12",
     "decimal.js": "^10.4.3"
-  }
+  },
+  "keywords": [
+    "solar-time",
+    "solar",
+    "time",
+    "sun-position",
+    "local-solar-time",
+    "equation-of-time",
+    "astronomy",
+    "daylight",
+    "sun",
+    "longitude",
+    "latitude",
+    "solar-energy",
+    "solar-panel",
+    "time-calculation",
+    "day-of-year",
+    "earth-orbit",
+    "time-correction",
+    "local-time",
+    "solar-calculator",
+    "day-angle"
+  ]
 }
