@@ -11,6 +11,9 @@ importers:
       dayjs:
         specifier: ^1.11.12
         version: 1.11.12
+      decimal.js:
+        specifier: ^10.4.3
+        version: 10.4.3
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
