@@ -39,6 +39,7 @@ const longitude = -122.4194; // Longitude for San Francisco, CA
 // Solar Function
 const solarTime = Solar(date, longitude);
 console.log(solarTime); // Outputs the local solar time and related calculations
+console.log(solarTime.LST); // Outputs the local solar time
 
 // SolarNow Function
 const solarTimeNow = SolarNow(longitude);
