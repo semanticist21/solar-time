@@ -2,7 +2,7 @@
   "name": "solar-time",
   "type": "module",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "This library provides functions to calculate local solar time, also known as local apparent time, based on a given location and date.",
   "scripts": {
     "dev": "bun run src/index.ts",
