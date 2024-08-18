@@ -5,6 +5,7 @@
   "version": "0.1.0",
   "description": "This library provides functions to calculate local solar time, also known as local apparent time, based on a given location and date.",
   "scripts": {
+    "dev": "bun run src/index.ts",
     "build": "vite build",
     "test": "jest --verbose false",
     "publish-prod": "pnpm run test && pnpm run build && pnpm publish --access=public"
@@ -42,6 +43,7 @@
     "vite": "^5.3.3"
   },
   "dependencies": {
-    "dayjs": "^1.11.12"
+    "dayjs": "^1.11.12",
+    "decimal.js": "^10.4.3"
   }
 }
