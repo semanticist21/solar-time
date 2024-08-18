@@ -6,11 +6,11 @@ dayjs.extend(dayOfYear);
 
 /**
  * Calculate solar time for a specific date
- * @param date - The date to calculate the solar time
- * @param longitude - The longitude of the location
- * @param options - The options to calculate the solar time
+ * @param {Date} date - The date to calculate the solar time.
+ * @param {number} longitude - The longitude of the location.
+ * @param {Object} [options] - The options to calculate the solar time.
+ * @param {number} [options.utc] - The UTC offset to use, defaults to the local UTC offset.
  * @returns {LST: Dayjs, TC: number, EoT: number, B: number, LSTM: number}
-
  */
 export const Solar = (
   date: Date,
@@ -35,9 +35,9 @@ export const Solar = (
 
 /**
  * Calculate solar time for the current date
- * @param longitude - The longitude of the location
- * @param options - The options to calculate the solar time
- * @returns {LST: Dayjs, TC: number, EoT: number, B: number, LSTM: number}
+ * @param {number} longitude - The longitude of the location.
+ * @param {Object} [options] - The options to calculate the solar time.
+ * @param {number} [options.utc] - The UTC offset to use, defaults to the local UTC offset.
  */
 export const SolarNow = (longitude: number, options?: { utc: number }) => {
   return Solar(new Date(), longitude, options);
