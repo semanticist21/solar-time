@@ -14,6 +14,10 @@ dayjs.extend(utc);
  * Uses NOAA Solar Position formulas with Spencer's Equation for declination.
  * Accounts for atmospheric refraction (0.833°).
  *
+ * **Note on sunrise/sunset**: In polar regions during polar night (winter) or midnight sun (summer),
+ * the sun may never rise or set. In these cases, sunrise and sunset will be `null`.
+ * This occurs when the calculated hour angle cosine is outside the valid range [-1, 1].
+ *
  * @param date - The date to calculate for (Date object, ISO string, or timestamp)
  * @param longitude - Longitude in degrees (-180 to 180, positive = East)
  * @param latitude - Latitude in degrees (-90 to 90, positive = North)
@@ -23,7 +27,7 @@ dayjs.extend(utc);
  * @example
  * ```typescript
  * const result = getSunPosition(new Date(), -98.583, 39.833, {utcOffset: -5});
- * console.log(result.sunrise?.toISOString());  // Sunrise time
+ * console.log(result.sunrise?.toISOString());  // Sunrise time (or null in polar regions)
  * console.log(result.azimuth);  // 180.5° (south)
  * console.log(result.elevation);  // 45.2° above horizon
  * ```
@@ -46,7 +50,8 @@ export const getSunPosition = (
 
   // Calculate sunrise/sunset hour angle
   // cos(ω) = [cos(90.833°) - sin(φ)sin(δ)] / [cos(φ)cos(δ)]
-  const zenithRad = 90.833 * (Math.PI / 180); // Atmospheric refraction + solar disk
+  // 90.833° = 90° (horizon) + 0.833° (0.6° atmospheric refraction + ~0.25° solar disk radius)
+  const zenithRad = 90.833 * (Math.PI / 180);
   const cosOmega =
     (Math.cos(zenithRad) - Math.sin(latRad) * Math.sin(declRad)) /
     (Math.cos(latRad) * Math.cos(declRad));
@@ -55,6 +60,8 @@ export const getSunPosition = (
   let sunset: Date | null = null;
 
   // Check if sun rises/sets (|cosOmega| <= 1)
+  // If |cosOmega| > 1, acos() is mathematically undefined → polar night (sun never rises) or midnight sun (sun never sets)
+  // Example: Arctic Circle in winter (polar night) or summer (midnight sun)
   if (Math.abs(cosOmega) <= 1) {
     const omegaRad = Math.acos(cosOmega);
     const omegaDeg = omegaRad * (180 / Math.PI);
