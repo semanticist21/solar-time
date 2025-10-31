@@ -52,3 +52,41 @@ export interface SolarTimeResult {
    */
   declination: number;
 }
+
+/**
+ * Result of sun position calculation
+ */
+export interface SunPositionResult {
+  /**
+   * Sunrise time (Date object), null if sun doesn't rise
+   */
+  sunrise: Date | null;
+
+  /**
+   * Sunset time (Date object), null if sun doesn't set
+   */
+  sunset: Date | null;
+
+  /**
+   * Solar noon time (Date object) - when sun is highest
+   */
+  solarNoon: Date;
+
+  /**
+   * Solar azimuth angle in degrees (0° = North, 90° = East, 180° = South, 270° = West)
+   * Range: 0° to 360°
+   */
+  azimuth: number;
+
+  /**
+   * Solar elevation/altitude angle in degrees above horizon
+   * Range: -90° to +90° (negative = below horizon)
+   */
+  elevation: number;
+
+  /**
+   * Solar zenith angle in degrees from vertical
+   * Range: 0° to 180° (complement of elevation)
+   */
+  zenith: number;
+}

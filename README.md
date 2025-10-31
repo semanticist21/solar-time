@@ -29,26 +29,33 @@ This library calculates local solar time (apparent solar time) based on geograph
 ## Usage
 
 ```typescript
-import {getCurrentSolarTime, getSolarTime} from "solar-time";
+import {getCurrentSolarTime, getSolarTime, getSunPosition} from "solar-time";
 
 // Current solar time
 const now = getCurrentSolarTime(-122.4194); // San Francisco
 console.log(now.LST.toISOString()); // Date object
+console.log(now.declination); // Solar declination: -14.51°
 
 // Specific date
 const result = getSolarTime(new Date("2024-06-21"), 127.5);
 console.log(result.TC); // Time correction in minutes
 
-// With UTC offset
-const tokyo = getSolarTime(Date.now(), 139.6917, {utcOffset: 9});
+// With UTC offset and precision
+const tokyo = getSolarTime(Date.now(), 139.6917, {utcOffset: 9, precision: 2});
 
-// With precision rounding
-const precise = getSolarTime(Date.now(), 127.5, {precision: 2}); // TC rounded to 2 decimals
+// Sun position (sunrise, sunset, azimuth, elevation)
+const position = getSunPosition(
+  new Date("2025-11-01"),
+  -98.583, // longitude
+  39.833, // latitude
+  {utcOffset: -5}
+);
 
-// Flexible date input
-getSolarTime(new Date(), -122.4194); // Date object
-getSolarTime("2024-06-21T12:00:00Z", 127.5); // ISO string
-getSolarTime(Date.now(), 0); // Timestamp
+console.log(position.sunrise?.toISOString()); // 2025-11-01T13:04:00Z (08:04 EST)
+console.log(position.sunset?.toISOString()); // 2025-11-01T23:32:00Z (18:32 EST)
+console.log(position.solarNoon.toISOString()); // When sun is highest
+console.log(position.azimuth); // 180° (south at noon in northern hemisphere)
+console.log(position.elevation); // Angle above horizon
 ```
 
 ## API
@@ -84,6 +91,30 @@ Calculate solar time for the current moment.
 - `options?`: `SolarTimeOptions`
 
 **Returns:** `SolarTimeResult`
+
+### `getSunPosition(date, longitude, latitude, options?)`
+
+Calculate sun position including sunrise, sunset, azimuth, and elevation.
+
+Uses NOAA Solar Position formulas with atmospheric refraction correction (0.833°).
+
+**Parameters:**
+
+- `date`: `Date | string | number` - Date to calculate
+- `longitude`: `number` - Location longitude in degrees (-180 to 180, positive = East)
+- `latitude`: `number` - Location latitude in degrees (-90 to 90, positive = North)
+- `options?`: `SolarTimeOptions`
+
+**Returns:** `SunPositionResult`
+
+- `sunrise`: `Date | null` - Sunrise time (null if sun doesn't rise)
+- `sunset`: `Date | null` - Sunset time (null if sun doesn't set)
+- `solarNoon`: `Date` - Solar noon (when sun is highest)
+- `azimuth`: `number` - Solar azimuth angle in degrees (0° = North, 90° = East, 180° = South, 270° = West)
+- `elevation`: `number` - Solar elevation angle in degrees above horizon (-90° to +90°)
+- `zenith`: `number` - Solar zenith angle in degrees from vertical (0° to 180°)
+
+**Note:** In polar regions during polar night/day, sunrise/sunset may be null. Azimuth and elevation are calculated for the given time regardless of whether the sun is above the horizon.
 
 ## License
 
