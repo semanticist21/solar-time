@@ -45,4 +45,10 @@ export interface SolarTimeResult {
    * Local Standard Time Meridian - Reference longitude for the time zone
    */
   LSTM: number;
+
+  /**
+   * Solar Declination - Angle between sun and equatorial plane in degrees
+   * Range: -23.45° to +23.45°
+   */
+  declination: number;
 }

@@ -72,6 +72,7 @@ Calculate solar time for a specific date and location.
 - `EoT`: `number` - Equation of Time (minutes)
 - `B`: `number` - Day angle (degrees)
 - `LSTM`: `number` - Local Standard Time Meridian
+- `declination`: `number` - Solar declination angle (degrees, -23.45° to +23.45°)
 
 ### `getCurrentSolarTime(longitude, options?)`
 

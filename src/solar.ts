@@ -44,17 +44,33 @@ export const getSolarTime = (
 
   const LSTM = 15 * Math.abs(offset);
 
-  const B = (360 / 365) * (dayjsDate.dayOfYear() - 81);
-  const B_rad = B * (Math.PI / 180);
+  // Day angle in radians (Spencer's formula uses day 1 = Jan 1)
+  const T = (2 * Math.PI * (dayjsDate.dayOfYear() - 1)) / 365;
 
-  // Spencer's Equation for improved accuracy (±30 seconds vs ±2 minutes)
+  // Spencer's Equation for Equation of Time (±30 seconds accuracy)
   const EoT =
     229.18 *
     (0.000075 +
-      0.001868 * Math.cos(B_rad) -
-      0.032077 * Math.sin(B_rad) -
-      0.014615 * Math.cos(2 * B_rad) -
-      0.040849 * Math.sin(2 * B_rad));
+      0.001868 * Math.cos(T) -
+      0.032077 * Math.sin(T) -
+      0.014615 * Math.cos(2 * T) -
+      0.040849 * Math.sin(2 * T));
+
+  // Spencer's Equation for Solar Declination (in radians)
+  const declinationRad =
+    0.006918 -
+    0.399912 * Math.cos(T) +
+    0.070257 * Math.sin(T) -
+    0.006758 * Math.cos(2 * T) +
+    0.000907 * Math.sin(2 * T) -
+    0.002697 * Math.cos(3 * T) +
+    0.00148 * Math.sin(3 * T);
+
+  // Convert declination to degrees
+  const declination = declinationRad * (180 / Math.PI);
+
+  // Day angle in degrees (for backward compatibility)
+  const B = (360 / 365) * (dayjsDate.dayOfYear() - 1);
 
   let TC = 4 * (longitude - LSTM) + EoT;
 
@@ -70,6 +86,7 @@ export const getSolarTime = (
     EoT,
     B,
     LSTM,
+    declination,
   };
 };
 

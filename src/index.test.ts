@@ -13,12 +13,17 @@ describe("Solar Time Calculations", () => {
       expect(result).toHaveProperty("EoT");
       expect(result).toHaveProperty("B");
       expect(result).toHaveProperty("LSTM");
+      expect(result).toHaveProperty("declination");
 
       expect(typeof result.TC).toBe("number");
       expect(typeof result.EoT).toBe("number");
       expect(typeof result.B).toBe("number");
       expect(typeof result.LSTM).toBe("number");
+      expect(typeof result.declination).toBe("number");
       expect(result.LST instanceof Date).toBe(true);
+
+      // Declination should be within valid range
+      expect(Math.abs(result.declination)).toBeLessThanOrEqual(23.45);
     });
 
     test("should accept custom UTC offset", () => {
@@ -127,6 +132,50 @@ describe("Solar Time Calculations", () => {
       expect(result1.EoT).toBe(result2.EoT);
       expect(result1.B).toBe(result2.B);
       expect(result1.LSTM).toBe(result2.LSTM);
+    });
+
+    test("should match real solar calculator values (Nov 1, 2025)", () => {
+      // Real values from NOAA Solar Calculator
+      // Location: 39.833°N, -98.583°W (Kansas, USA)
+      // Date: 2025-11-01 12:15:43 PM EST (UTC-5)
+      // Expected EoT: 16.47 minutes
+      // Expected Solar Declination: -14.51°
+      // Expected Solar Noon: 13:17:52 local time
+
+      const date = new Date("2025-11-01T12:15:43-05:00");
+      const longitude = -98.583;
+      const result = getSolarTime(date, longitude, {utcOffset: -5});
+
+      // EoT should be close to 16.47 minutes (±0.5 min tolerance for Spencer's Equation)
+      expect(Math.abs(result.EoT - 16.47)).toBeLessThan(0.5);
+
+      // Solar Declination should be close to -14.51° (±0.3° tolerance)
+      expect(Math.abs(result.declination - -14.51)).toBeLessThan(0.3);
+
+      // LSTM for EST (UTC-5) should be 75°
+      expect(result.LSTM).toBe(75);
+
+      // TC = 4 * (longitude - LSTM) + EoT
+      const expectedTC = 4 * (longitude - 75) + result.EoT;
+      expect(Math.abs(result.TC - expectedTC)).toBeLessThan(0.01);
+    });
+
+    test("should match real solar calculator values (Jun 21, 2024)", () => {
+      // Summer solstice - EoT should be small, declination near maximum
+      const date = new Date("2024-06-21T12:00:00Z");
+      const longitude = 0; // Prime Meridian
+      const result = getSolarTime(date, longitude, {utcOffset: 0});
+
+      // Near summer solstice, EoT should be small (within ±5 minutes)
+      expect(Math.abs(result.EoT)).toBeLessThan(5);
+
+      // Day angle B = (360/365) * (172 - 1) ≈ 168.66°
+      const expectedB = (360 / 365) * (172 - 1);
+      expect(Math.abs(result.B - expectedB)).toBeLessThan(1);
+
+      // Solar declination near summer solstice should be close to +23.44°
+      expect(result.declination).toBeGreaterThan(23.0);
+      expect(result.declination).toBeLessThan(23.5);
     });
   });
 });
