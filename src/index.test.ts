@@ -298,5 +298,28 @@ describe("Solar Time Calculations", () => {
       expect(result.elevation).toBeLessThan(0);
       expect(result.zenith).toBeGreaterThan(90);
     });
+
+    test.skip("should match NOAA with Seoul timezone (Nov 1, 2025 20:52:56 KST)", () => {
+      // NOAA test with Asia/Seoul timezone (UTC+9) - NEEDS VERIFICATION
+      // Location: Kansas (39.833°N, -98.583°W)
+      // Time: 2025-11-01 20:52:56 KST (= 11:52:56 UTC = 05:52:56 CST)
+      // Expected: Azimuth 254.95°, Elevation -4.45°, EoT 16.46, Declination -14.44°
+      // Actual: Azimuth 97.13°, Elevation -13.78° (sun below horizon before sunrise)
+      const date = new Date("2025-11-01T20:52:56+09:00");
+      const longitude = -98.583;
+      const latitude = 39.833;
+      const result = getSunPosition(date, longitude, latitude, {utcOffset: 9});
+
+      console.log("Azimuth:", result.azimuth, "Expected: 254.95");
+      console.log("Elevation:", result.elevation, "Expected: -4.45");
+
+      // Note: Test values may need verification - timezone handling in NOAA unclear
+      expect(Math.abs(result.azimuth - 254.95)).toBeLessThan(2);
+      expect(Math.abs(result.elevation - -4.45)).toBeLessThan(1);
+
+      const solarTime = getSolarTime(date, longitude, {utcOffset: 9});
+      expect(Math.abs(solarTime.declination - -14.44)).toBeLessThan(0.3);
+      expect(Math.abs(solarTime.EoT - 16.46)).toBeLessThan(0.5);
+    });
   });
 });
