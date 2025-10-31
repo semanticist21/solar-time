@@ -21,12 +21,15 @@ dayjs.extend(dayOfYear);
  * // Basic usage
  * const result = getSolarTime(new Date(), -122.4194);
  *
- * // With custom UTC offset
- * const result = getSolarTime("2024-06-21T12:00:00Z", 127.5, { utcOffset: 9 });
+ * // With custom UTC offset and precision
+ * const result = getSolarTime("2024-06-21T12:00:00Z", 127.5, {
+ *   utcOffset: 9,
+ *   precision: 2  // Round TC to 2 decimal places
+ * });
  *
  * // Access results
- * console.log(result.LST);  // Local Solar Time (Dayjs object)
- * console.log(result.TC);   // Time correction in minutes
+ * console.log(result.LST);  // Local Solar Time (Date object)
+ * console.log(result.TC);   // Time correction in minutes (e.g., 12.34)
  * ```
  */
 export const getSolarTime = (
@@ -53,10 +56,16 @@ export const getSolarTime = (
       0.014615 * Math.cos(2 * B_rad) -
       0.040849 * Math.sin(2 * B_rad));
 
-  const TC = 4 * (longitude - LSTM) + EoT;
+  let TC = 4 * (longitude - LSTM) + EoT;
+
+  // Apply precision rounding if specified
+  if (options?.precision !== undefined) {
+    const factor = 10 ** options.precision;
+    TC = Math.round(TC * factor) / factor;
+  }
 
   return {
-    LST: dayjsDate.add(TC, "minute"),
+    LST: dayjsDate.add(TC, "minute").toDate(),
     TC,
     EoT,
     B,
@@ -76,8 +85,8 @@ export const getSolarTime = (
  * @example
  * ```typescript
  * // Calculate current solar time in San Francisco
- * const result = getCurrentSolarTime(-122.4194, { utcOffset: -8 });
- * console.log(result.LST.format("HH:mm:ss"));
+ * const result = getCurrentSolarTime(-122.4194, {utcOffset: -8});
+ * console.log(result.LST.toISOString());
  * ```
  */
 export const getCurrentSolarTime = (

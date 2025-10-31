@@ -18,7 +18,7 @@ describe("Solar Time Calculations", () => {
       expect(typeof result.EoT).toBe("number");
       expect(typeof result.B).toBe("number");
       expect(typeof result.LSTM).toBe("number");
-      expect(dayjs.isDayjs(result.LST)).toBe(true);
+      expect(result.LST instanceof Date).toBe(true);
     });
 
     test("should accept custom UTC offset", () => {
@@ -88,10 +88,45 @@ describe("Solar Time Calculations", () => {
       const longitude = 127.5;
       const result = getSolarTime(date, longitude);
 
-      const inputTime = dayjs(date);
-      const expectedTime = inputTime.add(result.TC, "minute");
+      const expectedTime = dayjs(date).add(result.TC, "minute").toDate();
 
-      expect(result.LST.valueOf()).toBe(expectedTime.valueOf());
+      expect(result.LST.getTime()).toBe(expectedTime.getTime());
+    });
+
+    test("should round TC to specified precision", () => {
+      const date = new Date("2024-06-21T12:00:00Z");
+      const longitude = 127.5;
+
+      // No precision - full precision
+      const resultNoPrecision = getSolarTime(date, longitude);
+      expect(resultNoPrecision.TC.toString()).toMatch(/\.\d{10,}/); // Many decimal places
+
+      // Precision 0 - integer
+      const result0 = getSolarTime(date, longitude, {precision: 0});
+      expect(Number.isInteger(result0.TC)).toBe(true);
+
+      // Precision 2 - 2 decimal places
+      const result2 = getSolarTime(date, longitude, {precision: 2});
+      const decimalPart = result2.TC.toString().split(".")[1] || "";
+      expect(decimalPart.length).toBeLessThanOrEqual(2);
+
+      // Precision 4 - 4 decimal places
+      const result4 = getSolarTime(date, longitude, {precision: 4});
+      const decimalPart4 = result4.TC.toString().split(".")[1] || "";
+      expect(decimalPart4.length).toBeLessThanOrEqual(4);
+    });
+
+    test("precision should not affect other values", () => {
+      const date = new Date("2024-06-21T12:00:00Z");
+      const longitude = 127.5;
+
+      const result1 = getSolarTime(date, longitude);
+      const result2 = getSolarTime(date, longitude, {precision: 2});
+
+      // EoT, B, LSTM should be unchanged
+      expect(result1.EoT).toBe(result2.EoT);
+      expect(result1.B).toBe(result2.B);
+      expect(result1.LSTM).toBe(result2.LSTM);
     });
   });
 });

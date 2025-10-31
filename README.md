@@ -29,23 +29,26 @@ This library calculates local solar time (apparent solar time) based on geograph
 ## Usage
 
 ```typescript
-import { getSolarTime, getCurrentSolarTime } from "solar-time";
+import {getCurrentSolarTime, getSolarTime} from "solar-time";
 
 // Current solar time
 const now = getCurrentSolarTime(-122.4194); // San Francisco
-console.log(now.LST.format("HH:mm:ss"));
+console.log(now.LST.toISOString()); // Date object
 
 // Specific date
 const result = getSolarTime(new Date("2024-06-21"), 127.5);
 console.log(result.TC); // Time correction in minutes
 
 // With UTC offset
-const tokyo = getSolarTime(Date.now(), 139.6917, { utcOffset: 9 });
+const tokyo = getSolarTime(Date.now(), 139.6917, {utcOffset: 9});
+
+// With precision rounding
+const precise = getSolarTime(Date.now(), 127.5, {precision: 2}); // TC rounded to 2 decimals
 
 // Flexible date input
-getSolarTime(new Date(), -122.4194);          // Date object
-getSolarTime("2024-06-21T12:00:00Z", 127.5);  // ISO string
-getSolarTime(Date.now(), 0);                   // Timestamp
+getSolarTime(new Date(), -122.4194); // Date object
+getSolarTime("2024-06-21T12:00:00Z", 127.5); // ISO string
+getSolarTime(Date.now(), 0); // Timestamp
 ```
 
 ## API
@@ -60,10 +63,11 @@ Calculate solar time for a specific date and location.
 - `longitude`: `number` - Location longitude in degrees (-180 to 180)
 - `options?`: `SolarTimeOptions`
   - `utcOffset?`: `number` - UTC offset in hours (e.g., -8 for PST, +9 for JST)
+  - `precision?`: `number` - Decimal places to round TC value (e.g., 2 for 12.34)
 
 **Returns:** `SolarTimeResult`
 
-- `LST`: `Dayjs` - Local Solar Time
+- `LST`: `Date` - Local Solar Time
 - `TC`: `number` - Time correction (minutes)
 - `EoT`: `number` - Equation of Time (minutes)
 - `B`: `number` - Day angle (degrees)

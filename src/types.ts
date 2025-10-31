@@ -1,5 +1,3 @@
-import type {Dayjs} from "dayjs";
-
 /**
  * Options for solar time calculation
  */
@@ -10,10 +8,13 @@ export interface SolarTimeOptions {
    */
   utcOffset?: number;
 
-  // Future extensibility:
-  // timezone?: string;           // IANA timezone (e.g., "America/Los_Angeles")
-  // precision?: "standard" | "high";  // Calculation precision level
-  // includeMetadata?: boolean;   // Include additional calculation metadata
+  /**
+   * Number of decimal places to round TC (Time Correction) value
+   * @default undefined (no rounding)
+   * @example
+   * precision: 2 → TC: 12.34 minutes
+   */
+  precision?: number;
 }
 
 /**
@@ -23,7 +24,7 @@ export interface SolarTimeResult {
   /**
    * Local Solar Time - The date/time adjusted to solar time
    */
-  LST: Dayjs;
+  LST: Date;
 
   /**
    * Time Correction - Minutes to adjust from standard time to solar time
