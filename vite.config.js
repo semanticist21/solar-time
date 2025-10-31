@@ -1,9 +1,9 @@
 // vite.config.ts
-import { defineConfig } from "vitest/config";
 
+import path from "node:path";
 import typescript from "@rollup/plugin-typescript";
-import path from "path";
-import { typescriptPaths } from "rollup-plugin-typescript-paths";
+import {typescriptPaths} from "rollup-plugin-typescript-paths";
+import {defineConfig} from "vitest/config";
 
 const __dirname = path.resolve();
 

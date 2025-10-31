@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import dayOfYear from "dayjs/plugin/dayOfYear";
-import type { SolarTimeResult, SolarTimeOptions } from "./types";
+import type {SolarTimeOptions, SolarTimeResult} from "./types";
 
 // plugins
 dayjs.extend(dayOfYear);

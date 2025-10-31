@@ -1,6 +1,6 @@
-import { test, expect, describe } from "vitest";
-import { getSolarTime, getCurrentSolarTime } from "./index";
 import dayjs from "dayjs";
+import {describe, expect, test} from "vitest";
+import {getCurrentSolarTime, getSolarTime} from "./index";
 
 describe("Solar Time Calculations", () => {
   describe("getCurrentSolarTime", () => {
@@ -23,7 +23,7 @@ describe("Solar Time Calculations", () => {
 
     test("should accept custom UTC offset", () => {
       const longitude = -122.4194;
-      const result = getCurrentSolarTime(longitude, { utcOffset: -8 });
+      const result = getCurrentSolarTime(longitude, {utcOffset: -8});
 
       expect(result.LSTM).toBe(120); // 15 * 8 = 120
     });
@@ -33,7 +33,7 @@ describe("Solar Time Calculations", () => {
     test("should calculate correct LSTM for given UTC offset", () => {
       const date = new Date("2024-06-21T12:00:00Z");
       const longitude = -122.4194; // San Francisco
-      const result = getSolarTime(date, longitude, { utcOffset: -8 });
+      const result = getSolarTime(date, longitude, {utcOffset: -8});
 
       expect(result.LSTM).toBe(120); // 15 * 8 = 120
     });
