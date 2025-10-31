@@ -1,5 +1,5 @@
 // vite.config.ts
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 import typescript from "@rollup/plugin-typescript";
 import path from "path";
@@ -16,6 +16,10 @@ export default defineConfig({
         replacement: path.resolve(__dirname, "./src"),
       },
     ],
+  },
+  test: {
+    globals: true,
+    environment: "node",
   },
   build: {
     manifest: true,

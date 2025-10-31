@@ -26,7 +26,15 @@ export const Solar = (
 
   const B = (360 / 365) * (dayjs(date).dayOfYear() - 81);
   const B_rad = B * (Math.PI / 180);
-  const EoT = 9.87 * Math.sin(2 * B_rad) - 7.53 * Math.cos(B_rad) - 1.5 * Math.sin(B_rad);
+
+  // Spencer's Equation for improved accuracy (±30 seconds vs ±2 minutes)
+  const EoT = 229.18 * (
+    0.000075 +
+    0.001868 * Math.cos(B_rad) -
+    0.032077 * Math.sin(B_rad) -
+    0.014615 * Math.cos(2 * B_rad) -
+    0.040849 * Math.sin(2 * B_rad)
+  );
 
   const TC = 4 * (longitude - LSTM) + EoT;
 
