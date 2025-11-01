@@ -78,13 +78,15 @@ src/
 ### Timezone Handling (Critical)
 
 **ISO 8601 Strings with Timezone:**
-- When ISO string has timezone (e.g., `2025-11-01T09:00:00+09:00`), it's extracted and used
-- All return values are ISO 8601 strings preserving timezone information
+- When ISO string has timezone (e.g., `2025-11-01T09:00:00+09:00`), it's automatically extracted and preserved
+- All return values are ISO 8601 strings with the **same timezone** as input
+- `addMinutes()` preserves timezone by using optional `timezoneOffset` parameter
 
 **Date Objects and Timestamps:**
-- Date objects and timestamps **lose timezone information** (only store UTC timestamp)
-- Users **must** provide explicit `utcOffset` option when using Date objects
-- `getUTCOffset()` returns 0 for Date objects/timestamps (requires manual offset)
+- Date objects and timestamps **do not contain timezone information** (only store UTC timestamp)
+- `getUTCOffset(new Date())` returns **0** (not system timezone!)
+- Users **must** provide explicit `utcOffset` option for non-UTC timezones
+- Without `utcOffset`, Date/timestamp inputs are treated as **UTC (offset = 0)**
 
 **UTC Offset Sign Convention:**
 - Positive offset = East of GMT (e.g., +9 for Tokyo)
@@ -96,12 +98,12 @@ src/
 All utilities support Date objects, ISO strings, and timestamps:
 
 - `getDayOfYear(date)`: Returns 1-365/366 based on **UTC date components**
-- `parseUTCOffset(isoString)`: Extracts offset from ISO string (e.g., "+09:00" → 9)
-- `getUTCOffset(date)`: Returns offset from ISO string, or 0 for Date/timestamp
+- `getUTCOffset(date)`: Returns offset from ISO string (e.g., "+09:00" → 9), or 0 for Date/timestamp
 - `getUTCMidnight(date)`: Returns UTC midnight of the **local date** (accounts for timezone)
 - `getLocalTimeInMinutes(date)`: Returns local time-of-day in minutes (0-1440)
-- `addMinutes(date, minutes)`: Adds minutes and returns ISO 8601 string
+- `addMinutes(date, minutes, timezoneOffset?)`: Adds minutes and returns ISO 8601 string **preserving timezone**
 - `toDate(date)`: Converts any input to Date object
+- `formatWithTimezone(date, offsetHours)`: Internal helper for ISO 8601 formatting with timezone
 
 **Critical:** `getUTCMidnight` must use the **local date**, not UTC date. For example:
 - Input: `2025-11-01T20:00:00-05:00` (Nov 1, 8 PM EST)
@@ -112,20 +114,22 @@ All utilities support Date objects, ISO strings, and timestamps:
 ## Testing
 
 **Test Framework:** Vitest (not Jest)
-- Test file: `src/index.test.ts` (20 tests)
+- Test file: `src/index.test.ts` (22 tests)
 - Test environment: Node.js
 - Uses real NOAA calculator values for validation
 
 **Key Test Data:**
 - Kansas location: 39.833°N, -98.583°W
-- Multiple timezone tests: EST (-5), KST (+9), Dubai (+4), EDT (-4)
+- Multiple timezone tests: EST (-5), KST (+9), Dubai (+4), UTC+10, JST (+9)
 - Tests validate against NOAA with ±1° azimuth, ±0.5° elevation tolerance
+- Spencer's Equation EoT tolerance: ±1 minute (NOAA uses more precise algorithms)
 
 **When Adding Tests:**
 - Use ISO 8601 strings with explicit timezone
 - Verify against NOAA Solar Calculator (https://gml.noaa.gov/grad/solcalc/)
 - Test sunrise/sunset times with ±3 minute tolerance
-- Test declination with ±0.3° tolerance
+- Test declination with ±0.5° tolerance
+- Account for Spencer's Equation approximation (±30s accuracy, ±1 min for EoT)
 
 ## Code Conventions
 

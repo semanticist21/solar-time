@@ -15,14 +15,14 @@ export const getSolarTime = (
   options?: SolarTimeOptions
 ): SolarTimeResult => {
   const dateObj = toDate(date);
-
   const offset = options?.utcOffset ?? getUTCOffset(date);
   const LSTM = 15 * offset;
 
-  // Day angle (radians, day 1 = Jan 1)
-  const T = (2 * Math.PI * (getDayOfYear(dateObj) - 1)) / 365;
+  // Day angle T in radians (day 1 = Jan 1)
+  const dayOfYear = getDayOfYear(dateObj);
+  const T = (2 * Math.PI * (dayOfYear - 1)) / 365;
 
-  // Spencer's Equation: EoT (minutes)
+  // Spencer's Equation for Equation of Time (minutes)
   const EoT =
     229.18 *
     (0.000075 +
@@ -31,7 +31,7 @@ export const getSolarTime = (
       0.014615 * Math.cos(2 * T) -
       0.040849 * Math.sin(2 * T));
 
-  // Spencer's Equation: Solar declination (radians)
+  // Spencer's Equation for solar declination (radians)
   const declinationRad =
     0.006918 -
     0.399912 * Math.cos(T) +
@@ -42,8 +42,9 @@ export const getSolarTime = (
     0.00148 * Math.sin(3 * T);
 
   const declination = declinationRad * (180 / Math.PI);
-  const B = (360 / 365) * (getDayOfYear(dateObj) - 1); // Day angle (degrees)
+  const B = (360 / 365) * (dayOfYear - 1); // Day angle in degrees
 
+  // Time Correction: TC = 4 * (longitude - LSTM) + EoT
   let TC = 4 * (longitude - LSTM) + EoT;
 
   if (options?.precision !== undefined) {
@@ -52,7 +53,7 @@ export const getSolarTime = (
   }
 
   return {
-    LST: addMinutes(dateObj, TC),
+    LST: addMinutes(date, TC, offset), // Preserve timezone from input
     TC,
     EoT,
     B,

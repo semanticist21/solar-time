@@ -155,7 +155,7 @@ describe("Solar Time Calculations", () => {
       expect(result.LSTM).toBe(-75);
 
       // TC = 4 * (longitude - LSTM) + EoT
-      const expectedTC = 4 * (longitude - (-75)) + result.EoT;
+      const expectedTC = 4 * (longitude - -75) + result.EoT;
       expect(Math.abs(result.TC - expectedTC)).toBeLessThan(0.01);
     });
 
@@ -312,19 +312,31 @@ describe("Solar Time Calculations", () => {
       // Sunrise should be around 08:04 (±3 minutes tolerance)
       expect(result.sunrise).not.toBeNull();
       if (result.sunrise) {
-        const diffMinutes = Math.abs(new Date(result.sunrise).getTime() - new Date("2025-11-01T08:04:00-05:00").getTime()) / (60 * 1000);
+        const diffMinutes =
+          Math.abs(
+            new Date(result.sunrise).getTime() - new Date("2025-11-01T08:04:00-05:00").getTime()
+          ) /
+          (60 * 1000);
         expect(diffMinutes).toBeLessThan(3);
       }
 
       // Sunset should be around 18:32 (±3 minutes tolerance)
       expect(result.sunset).not.toBeNull();
       if (result.sunset) {
-        const diffMinutes = Math.abs(new Date(result.sunset).getTime() - new Date("2025-11-01T18:32:00-05:00").getTime()) / (60 * 1000);
+        const diffMinutes =
+          Math.abs(
+            new Date(result.sunset).getTime() - new Date("2025-11-01T18:32:00-05:00").getTime()
+          ) /
+          (60 * 1000);
         expect(diffMinutes).toBeLessThan(3);
       }
 
       // Solar Noon should be around 13:17:52 (±2 minutes tolerance)
-      const noonDiffMinutes = Math.abs(new Date(result.solarNoon).getTime() - new Date("2025-11-01T13:17:52-05:00").getTime()) / (60 * 1000);
+      const noonDiffMinutes =
+        Math.abs(
+          new Date(result.solarNoon).getTime() - new Date("2025-11-01T13:17:52-05:00").getTime()
+        ) /
+        (60 * 1000);
       expect(noonDiffMinutes).toBeLessThan(2);
     });
 
@@ -396,16 +408,28 @@ describe("Solar Time Calculations", () => {
       expect(result.sunset).not.toBeNull();
       if (result.sunrise && result.sunset) {
         // Sunrise ~17:04 Dubai time (±3 minutes tolerance)
-        const sunriseDiff = Math.abs(new Date(result.sunrise).getTime() - new Date("2025-11-01T17:04:00+04:00").getTime()) / (60 * 1000);
+        const sunriseDiff =
+          Math.abs(
+            new Date(result.sunrise).getTime() - new Date("2025-11-01T17:04:00+04:00").getTime()
+          ) /
+          (60 * 1000);
         expect(sunriseDiff).toBeLessThan(3);
 
         // Sunset ~03:32 Nov 2 Dubai time (±3 minutes tolerance)
-        const sunsetDiff = Math.abs(new Date(result.sunset).getTime() - new Date("2025-11-02T03:32:00+04:00").getTime()) / (60 * 1000);
+        const sunsetDiff =
+          Math.abs(
+            new Date(result.sunset).getTime() - new Date("2025-11-02T03:32:00+04:00").getTime()
+          ) /
+          (60 * 1000);
         expect(sunsetDiff).toBeLessThan(3);
       }
 
       // Solar Noon ~22:17:52 Dubai time (±2 minutes tolerance)
-      const noonDiff = Math.abs(new Date(result.solarNoon).getTime() - new Date("2025-11-01T22:17:52+04:00").getTime()) / (60 * 1000);
+      const noonDiff =
+        Math.abs(
+          new Date(result.solarNoon).getTime() - new Date("2025-11-01T22:17:52+04:00").getTime()
+        ) /
+        (60 * 1000);
       expect(noonDiff).toBeLessThan(2);
 
       // Verify solar time calculations
@@ -435,16 +459,28 @@ describe("Solar Time Calculations", () => {
       expect(result.sunset).not.toBeNull();
       if (result.sunrise && result.sunset) {
         // Sunrise ~15:49 Dubai time (±3 minutes tolerance)
-        const sunriseDiff = Math.abs(new Date(result.sunrise).getTime() - new Date("2021-04-20T15:49:00+04:00").getTime()) / (60 * 1000);
+        const sunriseDiff =
+          Math.abs(
+            new Date(result.sunrise).getTime() - new Date("2021-04-20T15:49:00+04:00").getTime()
+          ) /
+          (60 * 1000);
         expect(sunriseDiff).toBeLessThan(3);
 
         // Sunset ~05:18 Apr 21 Dubai time (±3 minutes tolerance)
-        const sunsetDiff = Math.abs(new Date(result.sunset).getTime() - new Date("2021-04-21T05:18:00+04:00").getTime()) / (60 * 1000);
+        const sunsetDiff =
+          Math.abs(
+            new Date(result.sunset).getTime() - new Date("2021-04-21T05:18:00+04:00").getTime()
+          ) /
+          (60 * 1000);
         expect(sunsetDiff).toBeLessThan(3);
       }
 
       // Solar Noon ~22:33:14 Dubai time (±2 minutes tolerance)
-      const noonDiff = Math.abs(new Date(result.solarNoon).getTime() - new Date("2021-04-20T22:33:14+04:00").getTime()) / (60 * 1000);
+      const noonDiff =
+        Math.abs(
+          new Date(result.solarNoon).getTime() - new Date("2021-04-20T22:33:14+04:00").getTime()
+        ) /
+        (60 * 1000);
       expect(noonDiff).toBeLessThan(2);
 
       // Verify solar time calculations

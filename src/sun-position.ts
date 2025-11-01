@@ -1,6 +1,6 @@
 import {getSolarTime} from "./solar";
 import type {SolarTimeOptions, SunPositionResult} from "./types";
-import {addMinutes, getLocalTimeInMinutes, getUTCMidnight} from "./utils/date";
+import {addMinutes, getLocalTimeInMinutes, getUTCMidnight, getUTCOffset} from "./utils/date";
 
 /**
  * Calculate sun position using NOAA formulas (0.833° atmospheric refraction).
@@ -20,12 +20,13 @@ export const getSunPosition = (
 ): SunPositionResult => {
   const solarTime = getSolarTime(date, longitude, options);
   const {declination, EoT} = solarTime;
+  const offset = options?.utcOffset ?? getUTCOffset(date);
 
   const latRad = latitude * (Math.PI / 180);
   const declRad = declination * (Math.PI / 180);
 
   // Sunrise/sunset hour angle: cos(ω) = [cos(90.833°) - sin(φ)sin(δ)] / [cos(φ)cos(δ)]
-  // 90.833° = horizon + atmospheric refraction + solar disk radius
+  // 90.833° includes horizon (90°) + atmospheric refraction (0.833°)
   const zenithRad = 90.833 * (Math.PI / 180);
   const cosOmega =
     (Math.cos(zenithRad) - Math.sin(latRad) * Math.sin(declRad)) /
@@ -43,14 +44,14 @@ export const getSunPosition = (
     const sunsetMinutes = 720 - 4 * (longitude - omegaDeg) - EoT;
 
     const utcMidnight = getUTCMidnight(date);
-    sunrise = addMinutes(utcMidnight, sunriseMinutes);
-    sunset = addMinutes(utcMidnight, sunsetMinutes);
+    sunrise = addMinutes(utcMidnight, sunriseMinutes, offset);
+    sunset = addMinutes(utcMidnight, sunsetMinutes, offset);
   }
 
-  // Solar noon (hour angle = 0)
+  // Solar noon: when sun is highest (hour angle = 0)
   const solarNoonMinutes = 720 - 4 * longitude - EoT;
   const utcMidnight = getUTCMidnight(date);
-  const solarNoon = addMinutes(utcMidnight, solarNoonMinutes);
+  const solarNoon = addMinutes(utcMidnight, solarNoonMinutes, offset);
 
   // Current sun position (azimuth, elevation)
   const inputMinutes = getLocalTimeInMinutes(date);
