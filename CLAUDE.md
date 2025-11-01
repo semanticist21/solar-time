@@ -4,75 +4,161 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a TypeScript library for calculating local solar time (also known as local apparent time) based on geographical location and date. The library uses Spencer's Equation for improved accuracy (±30 seconds) and accounts for Earth's elliptical orbit and axial tilt.
-
-**Key Components:**
-- **solar.ts**: Core solar time calculations using Spencer's Equation (`getSolarTime`, `getCurrentSolarTime`)
-- **types.ts**: TypeScript type definitions (`SolarTimeResult` interface)
-- Calculates astronomical values: LST, TC, EoT, B, LSTM with ±30 second accuracy
+This is a **zero-dependency** TypeScript library for calculating local solar time and sun position with ±30 second accuracy using Spencer's Equation and NOAA formulas. All calculations use native JavaScript Date API without external dependencies.
 
 ## Development Commands
 
 **Package Manager**: This project uses `pnpm` (version 10.20.0+)
 
 ```bash
-# Run tests
+# Run all tests
 pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
 
 # Build the library (creates dist/ with ES and CJS formats)
 pnpm build
 
-# Development mode (runs src/index.ts with Bun)
-pnpm dev
+# Linting and formatting (using Biome)
+pnpm run format        # Format code
+pnpm run format:check  # Check formatting
+pnpm run lint          # Lint code
+pnpm run lint:fix      # Lint and auto-fix
+pnpm run check         # Run all checks (format + lint)
+pnpm run check:fix     # Run all checks and auto-fix
 
-# Full publish workflow (runs tests, builds, then publishes)
+# Full publish workflow (check, test, build, publish)
 pnpm run publish-prod
 ```
 
-**Testing:**
-- Tests use Jest with ts-jest transformer
-- Test files: `src/index.test.ts`
-- Test environment: jsdom
-- Setup file: `jest.setup.ts` (configured but verify contents before modifying)
-
 **Build System:**
-- Uses Vite with Rollup for bundling
+- **Vite** with Rollup for bundling
 - Outputs: ES modules (`dist/index.js`) and CommonJS (`dist/index.cjs`)
-- Includes TypeScript declarations
+- TypeScript declarations automatically generated
 - Path alias: `@/*` maps to `./src/*`
+
+**Code Quality:**
+- **Biome** for formatting and linting (not ESLint/Prettier)
+- Formatting: 2 spaces, line width 100, double quotes, semicolons required
+- Linting: `useImportType` enforced for type-only imports
+- TypeScript strict mode with `noUnusedLocals` and `noUnusedParameters`
 
 ## Architecture
 
-**Single-Module Design:**
-The library provides solar time calculations using Spencer's Equation for improved accuracy:
+**Module Structure:**
+```
+src/
+├── index.ts           # Public API exports
+├── types.ts           # TypeScript interfaces for all public types
+├── solar.ts           # Core solar time calculations (Spencer's Equation)
+├── sun-position.ts    # Sun position calculations (NOAA formulas)
+└── utils/
+    └── date.ts        # Native Date API utilities (no external dependencies)
+```
 
-**Core Module** (`solar.ts`):
-- Uses native JavaScript `Math` operations
-- Spencer's Equation for ±30 second accuracy
-- Flexible date input (Date, string, number)
-- Options object pattern for extensibility
+### Core Calculation Flow
 
-**Type Definitions** (`types.ts`):
-- `SolarTimeOptions`: Configuration interface for calculations
-- `SolarTimeResult`: Standardized result structure
+**Solar Time** (`solar.ts`):
+1. Accepts Date object, ISO 8601 string, or timestamp
+2. Extracts UTC offset from ISO string or uses provided `utcOffset` option
+3. Calculates **LSTM** (Local Standard Time Meridian) = `15 * utcOffset` (preserves sign)
+4. Computes day-of-year using UTC date components
+5. Applies Spencer's Equation for **EoT** (Equation of Time) and **declination**
+6. Returns **TC** (Time Correction) = `4 * (longitude - LSTM) + EoT`
+7. Returns **LST** as ISO 8601 string preserving original timezone
 
-**Astronomical Calculations:**
-Returns five calculated values:
-- **LST** (Local Solar Time): Dayjs object adjusted for solar time
-- **TC** (Time Correction): minutes to adjust from standard time to solar time
-- **EoT** (Equation of Time): Earth's orbit eccentricity correction in minutes
-- **B** (Day Angle): position in Earth's orbit in degrees
-- **LSTM** (Local Standard Time Meridian): reference longitude for time zone
+**Sun Position** (`sun-position.ts`):
+1. Gets solar time from `solar.ts` (TC, EoT, declination)
+2. Calculates sunrise/sunset using NOAA horizon angle (90.833° with refraction)
+3. Computes solar noon based on longitude and EoT
+4. Calculates current azimuth and elevation using hour angle
+5. Returns all times as ISO 8601 strings (null for polar regions with no sunrise/sunset)
 
-**Peer Dependencies:**
-The library requires `dayjs` to be installed by the consuming application. Ensure compatibility when making changes.
+### Timezone Handling (Critical)
+
+**ISO 8601 Strings with Timezone:**
+- When ISO string has timezone (e.g., `2025-11-01T09:00:00+09:00`), it's extracted and used
+- All return values are ISO 8601 strings preserving timezone information
+
+**Date Objects and Timestamps:**
+- Date objects and timestamps **lose timezone information** (only store UTC timestamp)
+- Users **must** provide explicit `utcOffset` option when using Date objects
+- `getUTCOffset()` returns 0 for Date objects/timestamps (requires manual offset)
+
+**UTC Offset Sign Convention:**
+- Positive offset = East of GMT (e.g., +9 for Tokyo)
+- Negative offset = West of GMT (e.g., -5 for EST)
+- LSTM preserves sign: UTC-5 → LSTM = -75° (75°W)
+
+### Date Utility Functions (`utils/date.ts`)
+
+All utilities support Date objects, ISO strings, and timestamps:
+
+- `getDayOfYear(date)`: Returns 1-365/366 based on **UTC date components**
+- `parseUTCOffset(isoString)`: Extracts offset from ISO string (e.g., "+09:00" → 9)
+- `getUTCOffset(date)`: Returns offset from ISO string, or 0 for Date/timestamp
+- `getUTCMidnight(date)`: Returns UTC midnight of the **local date** (accounts for timezone)
+- `getLocalTimeInMinutes(date)`: Returns local time-of-day in minutes (0-1440)
+- `addMinutes(date, minutes)`: Adds minutes and returns ISO 8601 string
+- `toDate(date)`: Converts any input to Date object
+
+**Critical:** `getUTCMidnight` must use the **local date**, not UTC date. For example:
+- Input: `2025-11-01T20:00:00-05:00` (Nov 1, 8 PM EST)
+- UTC time: Nov 2, 1:00 AM
+- Correct: Returns UTC midnight of **Nov 1** (the local date)
+- Wrong: Returning UTC midnight of Nov 2 causes sunset to be calculated for wrong day
+
+## Testing
+
+**Test Framework:** Vitest (not Jest)
+- Test file: `src/index.test.ts` (20 tests)
+- Test environment: Node.js
+- Uses real NOAA calculator values for validation
+
+**Key Test Data:**
+- Kansas location: 39.833°N, -98.583°W
+- Multiple timezone tests: EST (-5), KST (+9), Dubai (+4), EDT (-4)
+- Tests validate against NOAA with ±1° azimuth, ±0.5° elevation tolerance
+
+**When Adding Tests:**
+- Use ISO 8601 strings with explicit timezone
+- Verify against NOAA Solar Calculator (https://gml.noaa.gov/grad/solcalc/)
+- Test sunrise/sunset times with ±3 minute tolerance
+- Test declination with ±0.3° tolerance
 
 ## Code Conventions
 
-- TypeScript with strict mode enabled (`strict: true`)
-- ES2020 target with ESNext modules
-- Path imports use `@/` prefix for src directory
-- JSDoc comments required for all exported functions with examples
-- Explicit type definitions in `types.ts` for all public interfaces
-- Options pattern for extensible function parameters
-- Return types explicitly typed with interfaces
+**TypeScript:**
+- Strict mode with all strict checks enabled
+- Use `type` imports: `import type {SolarTimeResult}`
+- Path alias: `import {foo} from "@/utils/date"`
+- All exported functions require JSDoc with `@param` and `@returns`
+
+**Formatting (Biome):**
+- 2 space indentation
+- 100 character line width
+- Double quotes for strings
+- Semicolons required
+- No bracket spacing: `{foo}` not `{ foo }`
+
+**Return Value Convention:**
+- All date/time values returned as **ISO 8601 strings** (not Date objects)
+- Preserves timezone information from input
+- Null for impossible values (sunrise/sunset in polar regions)
+
+## Important Notes
+
+**Zero Dependencies:**
+- No external libraries allowed (including dayjs)
+- Use only native JavaScript Date API
+- All date/time utilities in `src/utils/date.ts`
+
+**LSTM Calculation:**
+- Must preserve sign: `LSTM = 15 * utcOffset` (never use `Math.abs`)
+- Negative offset → negative LSTM (e.g., UTC-5 → LSTM = -75°)
+
+**Mathematical Constants:**
+- Spencer's Equation coefficients are fixed (do not modify)
+- NOAA horizon angle: 90.833° (includes atmospheric refraction)
+- Hour angle: 15° per hour from solar noon

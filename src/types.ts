@@ -22,9 +22,9 @@ export interface SolarTimeOptions {
  */
 export interface SolarTimeResult {
   /**
-   * Local Solar Time - The date/time adjusted to solar time
+   * Local Solar Time - ISO 8601 string with timezone (e.g., "2025-11-01T13:17:52-05:00")
    */
-  LST: Date;
+  LST: string;
 
   /**
    * Time Correction - Minutes to adjust from standard time to solar time
@@ -58,19 +58,19 @@ export interface SolarTimeResult {
  */
 export interface SunPositionResult {
   /**
-   * Sunrise time (Date object), null if sun doesn't rise
+   * Sunrise time as ISO 8601 string, null if sun doesn't rise (polar night)
    */
-  sunrise: Date | null;
+  sunrise: string | null;
 
   /**
-   * Sunset time (Date object), null if sun doesn't set
+   * Sunset time as ISO 8601 string, null if sun doesn't set (midnight sun)
    */
-  sunset: Date | null;
+  sunset: string | null;
 
   /**
-   * Solar noon time (Date object) - when sun is highest
+   * Solar noon time as ISO 8601 string - when sun is highest
    */
-  solarNoon: Date;
+  solarNoon: string;
 
   /**
    * Solar azimuth angle in degrees (0° = North, 90° = East, 180° = South, 270° = West)

@@ -1,12 +1,6 @@
-import dayjs from "dayjs";
-import dayOfYear from "dayjs/plugin/dayOfYear";
-import utc from "dayjs/plugin/utc";
 import {getSolarTime} from "./solar";
 import type {SolarTimeOptions, SunPositionResult} from "./types";
-
-// plugins
-dayjs.extend(dayOfYear);
-dayjs.extend(utc);
+import {addMinutes, getLocalTimeInMinutes, getUTCMidnight} from "./utils/date";
 
 /**
  * Calculate sun position using NOAA formulas (0.833° atmospheric refraction).
@@ -16,7 +10,7 @@ dayjs.extend(utc);
  * @param longitude - Longitude in degrees (-180 to 180, + = East)
  * @param latitude - Latitude in degrees (-90 to 90, + = North)
  * @param options - Optional: utcOffset, precision
- * @returns Sun position (sunrise, sunset, solarNoon, azimuth, elevation, zenith)
+ * @returns Sun position with times as ISO 8601 strings preserving timezone
  */
 export const getSunPosition = (
   date: Date | string | number,
@@ -24,7 +18,6 @@ export const getSunPosition = (
   latitude: number,
   options?: SolarTimeOptions
 ): SunPositionResult => {
-  const dayjsDate = dayjs(date);
   const solarTime = getSolarTime(date, longitude, options);
   const {declination, EoT} = solarTime;
 
@@ -38,8 +31,8 @@ export const getSunPosition = (
     (Math.cos(zenithRad) - Math.sin(latRad) * Math.sin(declRad)) /
     (Math.cos(latRad) * Math.cos(declRad));
 
-  let sunrise: Date | null = null;
-  let sunset: Date | null = null;
+  let sunrise: string | null = null;
+  let sunset: string | null = null;
 
   // If |cosOmega| > 1, sun never rises/sets (polar regions)
   if (Math.abs(cosOmega) <= 1) {
@@ -49,18 +42,18 @@ export const getSunPosition = (
     const sunriseMinutes = 720 - 4 * (longitude + omegaDeg) - EoT;
     const sunsetMinutes = 720 - 4 * (longitude - omegaDeg) - EoT;
 
-    const utcMidnight = dayjs(date).utc().startOf("day");
-    sunrise = utcMidnight.add(sunriseMinutes, "minute").toDate();
-    sunset = utcMidnight.add(sunsetMinutes, "minute").toDate();
+    const utcMidnight = getUTCMidnight(date);
+    sunrise = addMinutes(utcMidnight, sunriseMinutes);
+    sunset = addMinutes(utcMidnight, sunsetMinutes);
   }
 
   // Solar noon (hour angle = 0)
   const solarNoonMinutes = 720 - 4 * longitude - EoT;
-  const utcMidnight = dayjs(date).utc().startOf("day");
-  const solarNoon = utcMidnight.add(solarNoonMinutes, "minute").toDate();
+  const utcMidnight = getUTCMidnight(date);
+  const solarNoon = addMinutes(utcMidnight, solarNoonMinutes);
 
   // Current sun position (azimuth, elevation)
-  const inputMinutes = dayjsDate.hour() * 60 + dayjsDate.minute() + dayjsDate.second() / 60;
+  const inputMinutes = getLocalTimeInMinutes(date);
   const solarTimeMinutes = inputMinutes + solarTime.TC;
 
   let solarTimeHours = solarTimeMinutes / 60;

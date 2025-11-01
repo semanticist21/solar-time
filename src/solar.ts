@@ -1,9 +1,5 @@
-import dayjs from "dayjs";
-import dayOfYear from "dayjs/plugin/dayOfYear";
 import type {SolarTimeOptions, SolarTimeResult} from "./types";
-
-// plugins
-dayjs.extend(dayOfYear);
+import {addMinutes, getDayOfYear, getUTCOffset, toDate} from "./utils/date";
 
 /**
  * Calculate local solar time using Spencer's Equation (±30s accuracy).
@@ -11,20 +7,20 @@ dayjs.extend(dayOfYear);
  * @param date - Date object, ISO string, or timestamp
  * @param longitude - Longitude in degrees (-180 to 180)
  * @param options - Optional: utcOffset, precision
- * @returns Solar time calculation results (LST, TC, EoT, B, LSTM, declination)
+ * @returns Solar time results with LST as ISO 8601 string preserving timezone
  */
 export const getSolarTime = (
   date: Date | string | number,
   longitude: number,
   options?: SolarTimeOptions
 ): SolarTimeResult => {
-  const dayjsDate = dayjs(date);
+  const dateObj = toDate(date);
 
-  const offset = options?.utcOffset ?? dayjsDate.utcOffset() / 60;
-  const LSTM = 15 * Math.abs(offset);
+  const offset = options?.utcOffset ?? getUTCOffset(date);
+  const LSTM = 15 * offset;
 
   // Day angle (radians, day 1 = Jan 1)
-  const T = (2 * Math.PI * (dayjsDate.dayOfYear() - 1)) / 365;
+  const T = (2 * Math.PI * (getDayOfYear(dateObj) - 1)) / 365;
 
   // Spencer's Equation: EoT (minutes)
   const EoT =
@@ -46,7 +42,7 @@ export const getSolarTime = (
     0.00148 * Math.sin(3 * T);
 
   const declination = declinationRad * (180 / Math.PI);
-  const B = (360 / 365) * (dayjsDate.dayOfYear() - 1); // Day angle (degrees)
+  const B = (360 / 365) * (getDayOfYear(dateObj) - 1); // Day angle (degrees)
 
   let TC = 4 * (longitude - LSTM) + EoT;
 
@@ -56,7 +52,7 @@ export const getSolarTime = (
   }
 
   return {
-    LST: dayjsDate.add(TC, "minute").toDate(),
+    LST: addMinutes(dateObj, TC),
     TC,
     EoT,
     B,
