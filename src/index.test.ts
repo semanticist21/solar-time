@@ -305,5 +305,40 @@ describe("Solar Time Calculations", () => {
       // Elevation ~-6.17° (±0.5° tolerance)
       expect(Math.abs(result.elevation - -6.17)).toBeLessThan(0.5);
     });
+
+    test("should match NOAA summer morning (Jun 13, 2025 09:15:28 EDT)", () => {
+      // NOAA Calculator Settings:
+      // - Time Zone: US/Michigan (UTC-4, EDT)
+      // - Local Time: 09:15:28 AM (morning - PM was display error)
+      // - Location: Kansas (39.833°N, -98.583°W)
+      // Expected: Azimuth 77.63°, Elevation 22.26°, EoT -0.16, Declination 23.24°
+      const longitude = -98.583;
+      const latitude = 39.833;
+      const result = getSunPosition("2025-06-13T09:15:28-04:00", longitude, latitude);
+
+      // Azimuth ~77.63° (±1° tolerance)
+      expect(Math.abs(result.azimuth - 77.63)).toBeLessThan(1);
+
+      // Elevation ~22.26° (±0.5° tolerance)
+      expect(Math.abs(result.elevation - 22.26)).toBeLessThan(0.5);
+
+      // Verify sunrise/sunset times
+      expect(result.sunrise).not.toBeNull();
+      expect(result.sunset).not.toBeNull();
+      if (result.sunrise && result.sunset) {
+        const sunriseLocal = dayjs(result.sunrise);
+        const sunsetLocal = dayjs(result.sunset);
+        const expectedSunrise = dayjs("2025-06-13T07:05:00-04:00");
+        const expectedSunset = dayjs("2025-06-13T22:04:00-04:00");
+
+        expect(Math.abs(sunriseLocal.diff(expectedSunrise, "minute"))).toBeLessThan(3);
+        expect(Math.abs(sunsetLocal.diff(expectedSunset, "minute"))).toBeLessThan(3);
+      }
+
+      // Verify solar time calculations
+      const solarTime = getSolarTime("2025-06-13T21:15:28-04:00", longitude);
+      expect(Math.abs(solarTime.EoT - -0.16)).toBeLessThan(0.5);
+      expect(Math.abs(solarTime.declination - 23.24)).toBeLessThan(0.3);
+    });
   });
 });
