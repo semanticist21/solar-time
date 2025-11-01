@@ -52,12 +52,14 @@ getSolarTime(Date.now(), longitude, {utcOffset: -5}); // EST (UTC-5)
 Calculate local solar time using Spencer's Equation.
 
 **Parameters:**
+
 - `date`: `Date | string | number` - Date object, ISO 8601 string, or timestamp
 - `longitude`: `number` - Longitude in degrees (-180 to 180, East is positive)
 - `options.utcOffset`: `number` - UTC offset in hours (auto-detected from ISO strings, defaults to 0 for Date/timestamp)
 - `options.precision`: `number` - Decimal places to round TC value
 
 **Returns:** `SolarTimeResult`
+
 - `LST`: `string` - Local Solar Time as ISO 8601 string (preserves input timezone)
 - `TC`: `number` - Time Correction in minutes
 - `EoT`: `number` - Equation of Time in minutes
@@ -70,12 +72,14 @@ Calculate local solar time using Spencer's Equation.
 Calculate sun position using NOAA formulas.
 
 **Parameters:**
+
 - `date`: `Date | string | number` - Date object, ISO 8601 string, or timestamp
 - `longitude`: `number` - Longitude in degrees (-180 to 180, East is positive)
 - `latitude`: `number` - Latitude in degrees (-90 to 90, North is positive)
 - `options.utcOffset`: `number` - UTC offset in hours (auto-detected from ISO strings, defaults to 0 for Date/timestamp)
 
 **Returns:** `SunPositionResult`
+
 - `sunrise`: `string | null` - Sunrise time as ISO 8601 string (null in polar night)
 - `sunset`: `string | null` - Sunset time as ISO 8601 string (null in midnight sun)
 - `solarNoon`: `string` - Solar noon time as ISO 8601 string (when sun is highest)

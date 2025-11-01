@@ -32,6 +32,9 @@ export const getSunPosition = (
     (Math.cos(zenithRad) - Math.sin(latRad) * Math.sin(declRad)) /
     (Math.cos(latRad) * Math.cos(declRad));
 
+  // Get UTC midnight once for all time calculations
+  const utcMidnight = getUTCMidnight(date);
+
   let sunrise: string | null = null;
   let sunset: string | null = null;
 
@@ -43,14 +46,12 @@ export const getSunPosition = (
     const sunriseMinutes = 720 - 4 * (longitude + omegaDeg) - EoT;
     const sunsetMinutes = 720 - 4 * (longitude - omegaDeg) - EoT;
 
-    const utcMidnight = getUTCMidnight(date);
     sunrise = addMinutes(utcMidnight, sunriseMinutes, offset);
     sunset = addMinutes(utcMidnight, sunsetMinutes, offset);
   }
 
   // Solar noon: when sun is highest (hour angle = 0)
   const solarNoonMinutes = 720 - 4 * longitude - EoT;
-  const utcMidnight = getUTCMidnight(date);
   const solarNoon = addMinutes(utcMidnight, solarNoonMinutes, offset);
 
   // Current sun position (azimuth, elevation)

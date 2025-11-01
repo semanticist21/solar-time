@@ -222,6 +222,49 @@ describe("Solar Time Calculations", () => {
       expect(localMinutes).toBeLessThanOrEqual(expectedLSTMinutesMax);
     });
 
+    test("should match NOAA calculator values (Mar 23, 2025 16:30 UTC+4)", () => {
+      // NOAA Solar Calculator test case
+      // Location: 212°E longitude
+      // Date: 2025-03-23 16:30:00 (UTC+4)
+      // Day of year: 82
+      // Expected EoT: -7.21 minutes (NOAA precision)
+      // Expected LSTM: 60.00° (15 * 4)
+      // Expected TC: 600.79 minutes = 4 * (212 - 60) + (-7.21)
+      // Expected LST: 02:30 next day (HH:MM)
+
+      const date = "2025-03-23T16:30:00+04:00";
+      const longitude = 212;
+      const result = getSolarTime(date, longitude);
+
+      // LSTM for UTC+4 should be 60° (15 * 4)
+      expect(result.LSTM).toBe(60);
+
+      // TC = 4 * (longitude - LSTM) + EoT
+      // TC = 4 * (212 - 60) + EoT = 608 + EoT
+      const expectedTC = 4 * (longitude - result.LSTM) + result.EoT;
+      expect(Math.abs(result.TC - expectedTC)).toBeLessThan(0.01);
+
+      // EoT within ±1 minute (Spencer's Equation approximation vs NOAA)
+      expect(Math.abs(result.EoT - -7.21)).toBeLessThan(1);
+
+      // TC should be approximately 600.79 minutes (±1 minute due to EoT difference)
+      expect(Math.abs(result.TC - 600.79)).toBeLessThan(1);
+
+      // LST should be approximately 02:30 next day (UTC+4)
+      // 16:30 + 600.79 minutes = 26:30:47 = 02:30:47 next day
+      const lstDate = new Date(result.LST);
+      const offset = 4; // UTC+4
+      let localMinutes = (lstDate.getUTCHours() + offset) * 60 + lstDate.getUTCMinutes();
+      // Normalize to 0-1440 range (24 hours)
+      if (localMinutes >= 1440) localMinutes -= 1440;
+      const expectedLSTMinutesMin = 2 * 60 + 29; // 02:29
+      const expectedLSTMinutesMax = 2 * 60 + 32; // 02:32
+
+      // LST should be between 02:29 and 02:32 (accounting for EoT difference)
+      expect(localMinutes).toBeGreaterThanOrEqual(expectedLSTMinutesMin);
+      expect(localMinutes).toBeLessThanOrEqual(expectedLSTMinutesMax);
+    });
+
     test("should match NOAA calculator values (Jan 5, 2025 16:30 UTC+9)", () => {
       // NOAA Solar Calculator test case
       // Location: 111°E longitude

@@ -23,9 +23,10 @@ export const getSolarTime = (
   const T = (2 * Math.PI * (dayOfYear - 1)) / 365;
 
   // Spencer's Equation for Equation of Time (minutes)
+  // Using corrected coefficient 0.0000075 (Spencer's 1998 correction)
   const EoT =
-    229.18 *
-    (0.000075 +
+    (1440 / (2 * Math.PI)) *
+    (0.0000075 +
       0.001868 * Math.cos(T) -
       0.032077 * Math.sin(T) -
       0.014615 * Math.cos(2 * T) -

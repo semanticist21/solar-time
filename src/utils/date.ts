@@ -1,5 +1,8 @@
 /**
- * Calculate day of year (1-365/366) based on UTC date components
+ * Calculate day of year (1-365/366) using UTC date components.
+ * Uses UTC to ensure consistent calculations regardless of local timezone.
+ * @param date - Date to calculate day of year for
+ * @returns Day of year (1 = Jan 1, 365/366 = Dec 31)
  */
 export function getDayOfYear(date: Date): number {
   const year = date.getUTCFullYear();
@@ -35,8 +38,10 @@ export function getUTCOffset(date: Date | string | number): number {
 }
 
 /**
- * Get UTC midnight of the local date (accounting for timezone)
- * Returns UTC midnight for the date as it appears in the local timezone
+ * Get UTC midnight of the local date (accounting for timezone).
+ * Returns midnight for the local date, not the UTC date.
+ * @param date - Date object, ISO string, or timestamp
+ * @returns UTC midnight (00:00:00) of the local date
  */
 export function getUTCMidnight(date: Date | string | number): Date {
   const d = toDate(date);
@@ -84,7 +89,8 @@ export function addMinutes(
 }
 
 /**
- * Format Date as ISO 8601 string with timezone offset
+ * Format Date as ISO 8601 string with timezone offset.
+ * @internal
  */
 function formatWithTimezone(date: Date, offsetHours: number): string {
   const localTime = new Date(date.getTime() + offsetHours * 60 * 60 * 1000);
@@ -112,7 +118,9 @@ export function toDate(date: Date | string | number): Date {
 }
 
 /**
- * Get local time of day in minutes (0-1440), accounting for timezone
+ * Get local time of day in minutes (0-1440), accounting for timezone.
+ * @param date - Date object, ISO string, or timestamp
+ * @returns Minutes since midnight (0-1440 range)
  */
 export function getLocalTimeInMinutes(date: Date | string | number): number {
   const dateObj = toDate(date);
