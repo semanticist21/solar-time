@@ -219,12 +219,9 @@ describe("Solar Time Calculations", () => {
       // Expected Sunset: 18:32 (local time)
       // Expected Solar Noon: 13:17:52 (local time)
 
-      const date = new Date("2025-11-01T00:00:00-05:00");
       const longitude = -98.583;
       const latitude = 39.833;
-      const result = getSunPosition(date, longitude, latitude, {
-        utcOffset: -5,
-      });
+      const result = getSunPosition("2025-11-01T00:00:00-05:00", longitude, latitude);
 
       // Sunrise should be around 08:04 (±3 minutes tolerance)
       expect(result.sunrise).not.toBeNull();
@@ -253,15 +250,12 @@ describe("Solar Time Calculations", () => {
 
     test.skip("should calculate correct position at solar noon", () => {
       // At solar noon, azimuth should be 180° (south in northern hemisphere)
-      const date = new Date("2025-11-01T00:00:00-05:00");
       const longitude = -98.583;
       const latitude = 39.833;
-      const result = getSunPosition(date, longitude, latitude, {
-        utcOffset: -5,
-      });
+      const result = getSunPosition("2025-11-01T00:00:00-05:00", longitude, latitude);
 
       // Use calculated solar noon time for accuracy
-      const noonResult = getSunPosition(result.solarNoon, longitude, latitude, {utcOffset: -5});
+      const noonResult = getSunPosition(result.solarNoon, longitude, latitude);
 
       // Azimuth at solar noon in northern hemisphere should be ~180° (south)
       // Allow ±2° tolerance due to calculation precision
@@ -273,10 +267,9 @@ describe("Solar Time Calculations", () => {
 
     test("should handle polar regions (no sunrise/sunset)", () => {
       // Arctic Circle in winter - polar night
-      const date = new Date("2024-12-21T12:00:00Z"); // Winter solstice
       const longitude = 0;
       const latitude = 80; // North of Arctic Circle
-      const result = getSunPosition(date, longitude, latitude, {utcOffset: 0});
+      const result = getSunPosition("2024-12-21T12:00:00Z", longitude, latitude);
 
       // In polar night, sun doesn't rise
       // (cosOmega > 1, so sunrise/sunset should be null)
@@ -287,12 +280,9 @@ describe("Solar Time Calculations", () => {
 
     test("should calculate elevation below horizon after sunset", () => {
       // After sunset, elevation should be negative
-      const date = new Date("2025-11-01T20:00:00-05:00"); // 8 PM (after sunset)
       const longitude = -98.583;
       const latitude = 39.833;
-      const result = getSunPosition(date, longitude, latitude, {
-        utcOffset: -5,
-      });
+      const result = getSunPosition("2025-11-01T20:00:00-05:00", longitude, latitude);
 
       // Sun should be below horizon
       expect(result.elevation).toBeLessThan(0);
@@ -305,10 +295,9 @@ describe("Solar Time Calculations", () => {
       // - Local Time: 09:02:01 AM (Seoul time)
       // - Location: Kansas (39.833°N, -98.583°W)
       // Expected: Azimuth 256.36°, Elevation -6.17°
-      const date = new Date("2025-11-01T09:02:01+09:00");
       const longitude = -98.583;
       const latitude = 39.833;
-      const result = getSunPosition(date, longitude, latitude, {utcOffset: 9});
+      const result = getSunPosition("2025-11-01T09:02:01+09:00", longitude, latitude);
 
       // Azimuth ~256.36° (±1° tolerance)
       expect(Math.abs(result.azimuth - 256.36)).toBeLessThan(1);
