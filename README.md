@@ -2,6 +2,15 @@
 
 Calculate local solar time and sun position with ±30 second accuracy using Spencer's Equation and NOAA formulas. **Zero dependencies** - uses only native JavaScript Date API.
 
+## Use Cases
+
+- ☀️ **Solar panel optimization** - Calculate optimal panel angles and solar tracking
+- 🌅 **Sunrise/sunset times** - Accurate astronomical event timing
+- 📷 **Photography planning** - Golden hour and sun position for shoots
+- 🏗️ **Architecture & construction** - Shadow analysis and solar exposure
+- 🌾 **Agriculture** - Daylight planning and solar radiation modeling
+- 🔭 **Astronomy** - Solar position calculations and sundial corrections
+
 ## Installation
 
 ```sh
