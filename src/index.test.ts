@@ -62,40 +62,17 @@ describe("Solar Time Calculations", () => {
       expect(result.LST).toBe(expectedTime);
     });
 
-    test("should round TC to specified precision", () => {
+    test("should return full precision values", () => {
       const date = "2024-06-21T12:00:00Z";
       const longitude = 127.5;
 
-      // No precision - full precision
-      const resultNoPrecision = getSolarTime(date, longitude);
-      expect(resultNoPrecision.TC.toString()).toMatch(/\.\d{10,}/); // Many decimal places
+      const result = getSolarTime(date, longitude);
 
-      // Precision 0 - integer
-      const result0 = getSolarTime(date, longitude, {precision: 0});
-      expect(Number.isInteger(result0.TC)).toBe(true);
-
-      // Precision 2 - 2 decimal places
-      const result2 = getSolarTime(date, longitude, {precision: 2});
-      const decimalPart = result2.TC.toString().split(".")[1] || "";
-      expect(decimalPart.length).toBeLessThanOrEqual(2);
-
-      // Precision 4 - 4 decimal places
-      const result4 = getSolarTime(date, longitude, {precision: 4});
-      const decimalPart4 = result4.TC.toString().split(".")[1] || "";
-      expect(decimalPart4.length).toBeLessThanOrEqual(4);
-    });
-
-    test("precision should not affect other values", () => {
-      const date = "2024-06-21T12:00:00Z";
-      const longitude = 127.5;
-
-      const result1 = getSolarTime(date, longitude);
-      const result2 = getSolarTime(date, longitude, {precision: 2});
-
-      // EoT, B, LSTM should be unchanged
-      expect(result1.EoT).toBe(result2.EoT);
-      expect(result1.B).toBe(result2.B);
-      expect(result1.LSTM).toBe(result2.LSTM);
+      // All numeric values should have full precision (not rounded)
+      expect(result.TC.toString()).toMatch(/\.\d{10,}/); // Many decimal places
+      expect(result.EoT.toString()).toMatch(/\.\d+/); // Has decimals
+      expect(result.B.toString()).toMatch(/\.\d+/); // Has decimals
+      expect(result.declination.toString()).toMatch(/\.\d+/); // Has decimals
     });
 
     test("should match real solar calculator values (Nov 1, 2025)", () => {

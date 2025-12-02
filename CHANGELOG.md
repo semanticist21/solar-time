@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0] - 2024-12-02
+
+### Changed
+
+- Removed `precision` option - library now returns maximum precision values
+- Users can round values themselves using `Math.round()` if needed
+- Updated documentation to clarify accuracy: ±30s for solar time, ±1-3min for sunrise/sunset
+
 ## [2.0.0] - 2024-12-02
 
 ### Breaking Changes

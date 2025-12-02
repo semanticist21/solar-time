@@ -50,7 +50,7 @@ getSolarTime("2025-11-01T09:00:00-05:00", longitude);  // EST
 
 ## API
 
-### `getSolarTime(isoDateTime, longitude, options?)`
+### `getSolarTime(isoDateTime, longitude)`
 
 Calculate local solar time using Spencer's Equation.
 
@@ -58,7 +58,6 @@ Calculate local solar time using Spencer's Equation.
 
 - `isoDateTime`: `string` - ISO 8601 string with timezone (e.g., "2025-11-01T09:00:00+09:00")
 - `longitude`: `number` - Longitude in degrees (-180 to 180, + = East, - = West)
-- `options.precision`: `number` - Decimal places to round TC value (optional)
 
 **Returns:** `SolarTimeResult`
 
@@ -69,7 +68,7 @@ Calculate local solar time using Spencer's Equation.
 - `LSTM`: `number` - Local Standard Time Meridian in degrees
 - `declination`: `number` - Solar declination in degrees (-23.45° to +23.45°)
 
-### `getSunPosition(isoDateTime, latitude, longitude, options?)`
+### `getSunPosition(isoDateTime, latitude, longitude)`
 
 Calculate sun position using NOAA formulas.
 
@@ -78,7 +77,6 @@ Calculate sun position using NOAA formulas.
 - `isoDateTime`: `string` - ISO 8601 string with timezone (e.g., "2025-11-01T09:00:00+09:00")
 - `latitude`: `number` - Latitude in degrees (-90 to 90, + = North, - = South)
 - `longitude`: `number` - Longitude in degrees (-180 to 180, + = East, - = West)
-- `options.precision`: `number` - Decimal places to round TC value (optional)
 
 **Returns:** `SunPositionResult`
 

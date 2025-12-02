@@ -1,5 +1,5 @@
 import {getSolarTime} from "./solar";
-import type {SolarTimeOptions, SunPositionResult} from "./types";
+import type {SunPositionResult} from "./types";
 import {addMinutes, getLocalTimeInMinutes, getUTCMidnight, getUTCOffset} from "./utils/date";
 
 /**
@@ -21,18 +21,16 @@ function validateLatitude(latitude: number): void {
  * @param isoDateTime - ISO 8601 string with timezone (e.g., "2025-11-01T09:00:00+09:00")
  * @param latitude - Latitude in degrees (-90 to 90, + = North, - = South)
  * @param longitude - Longitude in degrees (-180 to 180, + = East, - = West)
- * @param options - Optional: precision
  * @returns Sun position with times as ISO 8601 strings preserving timezone
  */
 export const getSunPosition = (
   isoDateTime: string,
   latitude: number,
-  longitude: number,
-  options?: SolarTimeOptions
+  longitude: number
 ): SunPositionResult => {
   validateLatitude(latitude);
 
-  const solarTime = getSolarTime(isoDateTime, longitude, options);
+  const solarTime = getSolarTime(isoDateTime, longitude);
   const {declination, EoT} = solarTime;
   const offset = getUTCOffset(isoDateTime);
 

@@ -1,4 +1,4 @@
-import type {SolarTimeOptions, SolarTimeResult} from "./types";
+import type {SolarTimeResult} from "./types";
 import {addMinutes, getDayOfYear, getUTCOffset} from "./utils/date";
 
 /**
@@ -31,14 +31,9 @@ function validateISOString(isoDateTime: string): void {
  *
  * @param isoDateTime - ISO 8601 string with timezone (e.g., "2025-11-01T09:00:00+09:00")
  * @param longitude - Longitude in degrees (-180 to 180, + = East, - = West)
- * @param options - Optional: precision
  * @returns Solar time results with LST as ISO 8601 string preserving timezone
  */
-export const getSolarTime = (
-  isoDateTime: string,
-  longitude: number,
-  options?: SolarTimeOptions
-): SolarTimeResult => {
+export const getSolarTime = (isoDateTime: string, longitude: number): SolarTimeResult => {
   validateISOString(isoDateTime);
   validateLongitude(longitude);
 
@@ -74,12 +69,7 @@ export const getSolarTime = (
   const B = (360 / 365) * (dayOfYear - 1); // Day angle in degrees
 
   // Time Correction: TC = 4 * (longitude - LSTM) + EoT
-  let TC = 4 * (longitude - LSTM) + EoT;
-
-  if (options?.precision !== undefined) {
-    const factor = 10 ** options.precision;
-    TC = Math.round(TC * factor) / factor;
-  }
+  const TC = 4 * (longitude - LSTM) + EoT;
 
   return {
     LST: addMinutes(isoDateTime, TC, offset), // Preserve timezone from input

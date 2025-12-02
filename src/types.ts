@@ -1,14 +1,8 @@
 /**
- * Options for solar time calculation
+ * Options for solar time calculation (currently empty, reserved for future options)
  */
 export interface SolarTimeOptions {
-  /**
-   * Number of decimal places to round TC (Time Correction) value
-   * @default undefined (no rounding)
-   * @example
-   * precision: 2 → TC: 12.34 minutes
-   */
-  precision?: number;
+  // Reserved for future options
 }
 
 /**
