@@ -3,24 +3,38 @@ import type {SolarTimeOptions, SunPositionResult} from "./types";
 import {addMinutes, getLocalTimeInMinutes, getUTCMidnight, getUTCOffset} from "./utils/date";
 
 /**
+ * Validate latitude value
+ */
+function validateLatitude(latitude: number): void {
+  if (typeof latitude !== "number" || Number.isNaN(latitude)) {
+    throw new Error("Latitude must be a valid number");
+  }
+  if (latitude < -90 || latitude > 90) {
+    throw new Error("Latitude must be between -90 and 90 degrees");
+  }
+}
+
+/**
  * Calculate sun position using NOAA formulas (0.833° atmospheric refraction).
  * Note: sunrise/sunset are null in polar regions (polar night/midnight sun).
  *
- * @param date - Date object, ISO string, or timestamp
- * @param longitude - Longitude in degrees (-180 to 180, + = East)
- * @param latitude - Latitude in degrees (-90 to 90, + = North)
- * @param options - Optional: utcOffset, precision
+ * @param isoDateTime - ISO 8601 string with timezone (e.g., "2025-11-01T09:00:00+09:00")
+ * @param latitude - Latitude in degrees (-90 to 90, + = North, - = South)
+ * @param longitude - Longitude in degrees (-180 to 180, + = East, - = West)
+ * @param options - Optional: precision
  * @returns Sun position with times as ISO 8601 strings preserving timezone
  */
 export const getSunPosition = (
-  date: Date | string | number,
-  longitude: number,
+  isoDateTime: string,
   latitude: number,
+  longitude: number,
   options?: SolarTimeOptions
 ): SunPositionResult => {
-  const solarTime = getSolarTime(date, longitude, options);
+  validateLatitude(latitude);
+
+  const solarTime = getSolarTime(isoDateTime, longitude, options);
   const {declination, EoT} = solarTime;
-  const offset = options?.utcOffset ?? getUTCOffset(date);
+  const offset = getUTCOffset(isoDateTime);
 
   const latRad = latitude * (Math.PI / 180);
   const declRad = declination * (Math.PI / 180);
@@ -33,7 +47,7 @@ export const getSunPosition = (
     (Math.cos(latRad) * Math.cos(declRad));
 
   // Get UTC midnight once for all time calculations
-  const utcMidnight = getUTCMidnight(date);
+  const utcMidnight = getUTCMidnight(isoDateTime);
 
   let sunrise: string | null = null;
   let sunset: string | null = null;
@@ -55,7 +69,7 @@ export const getSunPosition = (
   const solarNoon = addMinutes(utcMidnight, solarNoonMinutes, offset);
 
   // Current sun position (azimuth, elevation)
-  const inputMinutes = getLocalTimeInMinutes(date);
+  const inputMinutes = getLocalTimeInMinutes(isoDateTime);
   const solarTimeMinutes = inputMinutes + solarTime.TC;
 
   let solarTimeHours = solarTimeMinutes / 60;

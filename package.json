@@ -2,7 +2,7 @@
   "name": "solar-time",
   "type": "module",
   "private": false,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "packageManager": "pnpm@10.20.0",
   "description": "This library provides functions to calculate local solar time, also known as local apparent time, based on a given location and date.",
   "scripts": {

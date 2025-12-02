@@ -17,17 +17,15 @@ export function getDayOfYear(date: Date): number {
 }
 
 /**
- * Get UTC offset in hours from date input
- * For ISO strings with timezone, extracts offset; otherwise returns 0
+ * Get UTC offset in hours from ISO 8601 string with timezone
  * @example getUTCOffset("2025-11-01T09:00:00+09:00") -> 9
  * @example getUTCOffset("2025-11-01T09:00:00-05:00") -> -5
- * @example getUTCOffset(new Date()) -> 0
+ * @example getUTCOffset("2025-11-01T09:00:00Z") -> 0
  */
-export function getUTCOffset(date: Date | string | number): number {
-  if (typeof date !== "string") return 0;
-  if (date.endsWith("Z")) return 0;
+export function getUTCOffset(isoDateTime: string): number {
+  if (isoDateTime.endsWith("Z")) return 0;
 
-  const match = date.match(/([+-])(\d{2}):(\d{2})$/);
+  const match = isoDateTime.match(/([+-])(\d{2}):(\d{2})$/);
   if (!match) return 0;
 
   const sign = match[1] === "+" ? 1 : -1;
@@ -39,18 +37,18 @@ export function getUTCOffset(date: Date | string | number): number {
 
 /**
  * Get UTC midnight of the local date (accounting for timezone).
- * Returns midnight for the local date, not the UTC date.
- * @param date - Date object, ISO string, or timestamp
- * @returns UTC midnight (00:00:00) of the local date
+ * Returns midnight for the local date as ISO string, not the UTC date.
+ * @param isoDateTime - ISO 8601 string with timezone
+ * @returns UTC midnight (00:00:00) of the local date as ISO string
  */
-export function getUTCMidnight(date: Date | string | number): Date {
-  const d = toDate(date);
-  const offset = getUTCOffset(date);
+export function getUTCMidnight(isoDateTime: string): string {
+  const d = new Date(isoDateTime);
+  const offset = getUTCOffset(isoDateTime);
 
   const localTime = d.getTime() + offset * 60 * 60 * 1000;
   const localDate = new Date(localTime);
 
-  return new Date(
+  const utcMidnight = new Date(
     Date.UTC(
       localDate.getUTCFullYear(),
       localDate.getUTCMonth(),
@@ -61,28 +59,27 @@ export function getUTCMidnight(date: Date | string | number): Date {
       0
     )
   );
+
+  // Return as ISO string for consistency with other functions
+  if (offset !== 0) {
+    return formatWithTimezone(utcMidnight, offset);
+  }
+  return utcMidnight.toISOString();
 }
 
 /**
- * Add minutes to a date and return ISO 8601 string
- * Preserves timezone from ISO string input or uses provided offset
- * @param date - Base date/time
+ * Add minutes to an ISO 8601 datetime and return new ISO 8601 string
+ * Preserves timezone from input
+ * @param isoDateTime - Base ISO 8601 datetime string
  * @param minutes - Minutes to add (can be negative)
- * @param timezoneOffset - Optional UTC offset in hours (overrides auto-detection)
+ * @param timezoneOffset - UTC offset in hours
  */
-export function addMinutes(
-  date: Date | string | number,
-  minutes: number,
-  timezoneOffset?: number
-): string {
-  const d = toDate(date);
+export function addMinutes(isoDateTime: string, minutes: number, timezoneOffset: number): string {
+  const d = new Date(isoDateTime);
   const newTime = new Date(d.getTime() + minutes * 60 * 1000);
 
-  // Use provided offset, or auto-detect from input
-  const offset = timezoneOffset ?? getUTCOffset(date);
-
-  if (offset !== 0) {
-    return formatWithTimezone(newTime, offset);
+  if (timezoneOffset !== 0) {
+    return formatWithTimezone(newTime, timezoneOffset);
   }
 
   return newTime.toISOString();
@@ -111,20 +108,13 @@ function formatWithTimezone(date: Date, offsetHours: number): string {
 }
 
 /**
- * Convert any date input to Date object
- */
-export function toDate(date: Date | string | number): Date {
-  return typeof date === "string" || typeof date === "number" ? new Date(date) : date;
-}
-
-/**
  * Get local time of day in minutes (0-1440), accounting for timezone.
- * @param date - Date object, ISO string, or timestamp
+ * @param isoDateTime - ISO 8601 string with timezone
  * @returns Minutes since midnight (0-1440 range)
  */
-export function getLocalTimeInMinutes(date: Date | string | number): number {
-  const dateObj = toDate(date);
-  const offset = getUTCOffset(date);
+export function getLocalTimeInMinutes(isoDateTime: string): number {
+  const dateObj = new Date(isoDateTime);
+  const offset = getUTCOffset(isoDateTime);
 
   const utcMinutes =
     dateObj.getUTCHours() * 60 + dateObj.getUTCMinutes() + dateObj.getUTCSeconds() / 60;

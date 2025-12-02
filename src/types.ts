@@ -3,12 +3,6 @@
  */
 export interface SolarTimeOptions {
   /**
-   * UTC offset in hours (e.g., -8 for PST, +9 for JST)
-   * Defaults to the local timezone offset if not provided
-   */
-  utcOffset?: number;
-
-  /**
    * Number of decimal places to round TC (Time Correction) value
    * @default undefined (no rounding)
    * @example

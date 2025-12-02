@@ -1,6 +1,8 @@
 # solar-time
 
-Calculate local solar time and sun position with ±30 second accuracy using Spencer's Equation and NOAA formulas. **Zero dependencies** - uses only native JavaScript Date API.
+Calculate local solar time and sun position using Spencer's Equation and NOAA formulas. **Zero dependencies** - uses only native JavaScript Date API.
+
+**Accuracy**: ±30 seconds for solar time calculations, ±1-3 minutes for sunrise/sunset times (due to Spencer's Equation approximation vs NOAA's more precise algorithms).
 
 ## Use Cases
 
@@ -28,8 +30,8 @@ console.log(solar.LST);         // "2024-06-21T12:08:30.123Z"
 console.log(solar.TC);          // Time correction (minutes)
 console.log(solar.declination); // Solar declination (degrees)
 
-// Sun position with timezone (EST)
-const sun = getSunPosition("2025-11-01T00:00:00-05:00", -98.583, 39.833);
+// Sun position with timezone (EST) - Note: latitude, longitude order
+const sun = getSunPosition("2025-11-01T00:00:00-05:00", 39.833, -98.583);
 console.log(sun.sunrise);   // "2025-11-01T08:04:12-05:00" (EST timezone preserved)
 console.log(sun.sunset);    // "2025-11-01T18:32:45-05:00"
 console.log(sun.solarNoon); // "2025-11-01T13:17:52-05:00"
@@ -37,35 +39,26 @@ console.log(sun.azimuth);   // 180 (degrees, south at noon)
 console.log(sun.elevation); // Angle above horizon (degrees)
 ```
 
-**Timezone handling**: All returned times preserve the timezone from input ISO strings.
-
-⚠️ **Important**: Date objects and timestamps **do not contain timezone information**.
+**Timezone handling**: Only ISO 8601 strings with timezone are accepted. All returned times preserve the input timezone.
 
 ```typescript
-// ✅ ISO string with timezone - automatically detected and preserved
-getSolarTime("2025-11-01T09:00:00+09:00", longitude);
-// Returns: LST with +09:00 timezone
-
-// ⚠️ Date object - defaults to UTC, provide utcOffset for other timezones
-getSolarTime(new Date(), longitude);  // Treated as UTC
-getSolarTime(new Date(), longitude, {utcOffset: 9});  // JST (UTC+9)
-
-// ⚠️ Timestamp - defaults to UTC, provide utcOffset for other timezones
-getSolarTime(Date.now(), longitude, {utcOffset: -5}); // EST (UTC-5)
+// ✅ ISO string with timezone
+getSolarTime("2025-11-01T09:00:00+09:00", longitude);  // JST
+getSolarTime("2025-11-01T09:00:00Z", longitude);       // UTC
+getSolarTime("2025-11-01T09:00:00-05:00", longitude);  // EST
 ```
 
 ## API
 
-### `getSolarTime(date, longitude, options?)`
+### `getSolarTime(isoDateTime, longitude, options?)`
 
 Calculate local solar time using Spencer's Equation.
 
 **Parameters:**
 
-- `date`: `Date | string | number` - Date object, ISO 8601 string, or timestamp
-- `longitude`: `number` - Longitude in degrees (-180 to 180, East is positive)
-- `options.utcOffset`: `number` - UTC offset in hours (auto-detected from ISO strings, defaults to 0 for Date/timestamp)
-- `options.precision`: `number` - Decimal places to round TC value
+- `isoDateTime`: `string` - ISO 8601 string with timezone (e.g., "2025-11-01T09:00:00+09:00")
+- `longitude`: `number` - Longitude in degrees (-180 to 180, + = East, - = West)
+- `options.precision`: `number` - Decimal places to round TC value (optional)
 
 **Returns:** `SolarTimeResult`
 
@@ -76,16 +69,16 @@ Calculate local solar time using Spencer's Equation.
 - `LSTM`: `number` - Local Standard Time Meridian in degrees
 - `declination`: `number` - Solar declination in degrees (-23.45° to +23.45°)
 
-### `getSunPosition(date, longitude, latitude, options?)`
+### `getSunPosition(isoDateTime, latitude, longitude, options?)`
 
 Calculate sun position using NOAA formulas.
 
 **Parameters:**
 
-- `date`: `Date | string | number` - Date object, ISO 8601 string, or timestamp
-- `longitude`: `number` - Longitude in degrees (-180 to 180, East is positive)
-- `latitude`: `number` - Latitude in degrees (-90 to 90, North is positive)
-- `options.utcOffset`: `number` - UTC offset in hours (auto-detected from ISO strings, defaults to 0 for Date/timestamp)
+- `isoDateTime`: `string` - ISO 8601 string with timezone (e.g., "2025-11-01T09:00:00+09:00")
+- `latitude`: `number` - Latitude in degrees (-90 to 90, + = North, - = South)
+- `longitude`: `number` - Longitude in degrees (-180 to 180, + = East, - = West)
+- `options.precision`: `number` - Decimal places to round TC value (optional)
 
 **Returns:** `SunPositionResult`
 
