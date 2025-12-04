@@ -1,0 +1,8 @@
+# Lefthook configuration for git hooks
+# https://github.com/evilmartians/lefthook
+
+# Validate commit messages against Conventional Commits specification
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}

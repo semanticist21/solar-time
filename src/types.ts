@@ -1,11 +1,4 @@
 /**
- * Options for solar time calculation (currently empty, reserved for future options)
- */
-export interface SolarTimeOptions {
-  // Reserved for future options
-}
-
-/**
  * Result of solar time calculation
  */
 export interface SolarTimeResult {
